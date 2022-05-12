@@ -2,6 +2,9 @@ package string_sum
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
 //use these errors as appropriate, wrapping them with fmt.Errorf function
@@ -22,6 +25,34 @@ var (
 //
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
-func StringSum(input string) (output string, err error) {
-	return "", nil
+func StringSum(input string) (string, error) {
+	input = strings.ReplaceAll(input, " ", "")
+	if len(input) == 0 {
+		return "", fmt.Errorf("%w", errorEmptyInput)
+	}
+
+	if operandsCount(input) != 2 {
+		return "", fmt.Errorf("%w", errorNotTwoOperands)
+	}
+
+	var operandBorder, firstOperand, secondOperand int
+	var err error
+	if operandBorder = strings.LastIndex(input, "+"); operandBorder == -1 {
+		operandBorder = strings.LastIndex(input, "-")
+	}
+	if firstOperand, err = strconv.Atoi(strings.TrimLeft(input[0:operandBorder], "+")); err != nil {
+		return "", fmt.Errorf("failed to convert %q: %w", input[0:operandBorder], err)
+	}
+	if secondOperand, err = strconv.Atoi(strings.TrimLeft(input[operandBorder:], "+")); err != nil {
+		return "", fmt.Errorf("failed to convert %q: %w", input[operandBorder:], err)
+	}
+	return fmt.Sprint(firstOperand + secondOperand), nil
+}
+
+func operandsCount(input string) (count int) {
+	input = strings.TrimLeft(strings.TrimLeft(input, "+"), "-")
+	for _, subInput := range strings.Split(input, "-") {
+		count = count + len(strings.Split(subInput, "+"))
+	}
+	return
 }
